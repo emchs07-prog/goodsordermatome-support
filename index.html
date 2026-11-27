@@ -10,18 +10,127 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "グッズ注文まとめ", "operatingSystem": "macOS, iOS, iPadOS", "applicationCategory": "UtilitiesApplication", "description": "部活のグッズの申込を集計して、配布用・発注用の表と集金表まで作ります。", "url": "https://emchs07-prog.github.io/goodsordermatome-support/", "author": {"@type": "Person", "name": "Hideki Sato", "url": "https://emchs07-prog.github.io/"}, "downloadUrl": "https://apps.apple.com/jp/app/id6809134949"}</script>
 <!-- 検索向けの設定（ここまで） -->
 <style>
-  :root { color-scheme: light dark; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
-    max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem; line-height: 1.8;
+  :root {
+    color-scheme: light dark;
+    --bg:#ffffff; --bg2:#f5f7fb; --card:#ffffff; --text:#14171f; --mute:#5b6475; --line:#e3e7ef;
+    --accent:#2c6e9e; --accent2:#e07b39; --code:#0b0d12; --codetext:#e8ecf3; --shadow:0 10px 30px rgba(20,30,60,.08);
   }
-  h1 { border-bottom: 3px solid #CFA23C; padding-bottom: .4rem; }
-  h2 { margin-top: 2.5rem; color: #333A57; }
-  @media (prefers-color-scheme: dark) { h2 { color: #CFA23C; } }
-  footer { margin-top: 4rem; font-size: .85rem; opacity: .7; }
-  a { color: #B8892A; }
-  dt { font-weight: bold; margin-top: 1rem; }
-  code { background: rgba(127,127,127,.15); padding: 0 .3em; border-radius: 3px; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0b0d12; --bg2:#11151d; --card:#151a23; --text:#e9edf5; --mute:#9aa4b6; --line:#232a36;
+            --accent:#6fb4e8; --accent2:#ffa36b; --shadow:0 10px 30px rgba(0,0,0,.35); }
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:72px; }
+  body { margin:0; background:var(--bg); color:var(--text); line-height:1.8;
+         font-family:-apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+         -webkit-font-smoothing:antialiased; }
+  a { color:var(--accent); }
+  img { max-width:100%; height:auto; }
+  .wrap { max-width:1040px; margin:0 auto; padding:0 24px; }
+  /* 上の帯 */
+  .top { position:sticky; top:0; z-index:10; backdrop-filter:saturate(180%) blur(14px); -webkit-backdrop-filter:saturate(180%) blur(14px);
+         background:color-mix(in srgb, var(--bg) 82%, transparent); border-bottom:1px solid var(--line); }
+  .top .wrap { display:flex; align-items:center; gap:16px; height:56px; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:700; text-decoration:none; color:var(--text); white-space:nowrap; }
+  .brand img { width:28px; height:28px; border-radius:7px; }
+  .top nav { margin-left:auto; display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; }
+  .top nav a { color:var(--mute); text-decoration:none; font-size:.88rem; padding:6px 10px; border-radius:8px; white-space:nowrap; }
+  .top nav a:hover { color:var(--text); background:var(--bg2); }
+  /* 先頭 */
+  .hero { position:relative; overflow:hidden; text-align:center; padding:72px 0 40px; }
+  .hero::before { content:""; position:absolute; inset:-30% -10% auto; height:120%; z-index:-1; filter:blur(20px);
+    background:radial-gradient(40% 45% at 30% 35%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+               radial-gradient(35% 40% at 72% 30%, color-mix(in srgb, var(--accent2) 18%, transparent), transparent 70%); }
+  .hero .icon { width:112px; height:112px; border-radius:25px; box-shadow:var(--shadow); }
+  .hero h1 { font-size:clamp(2.4rem, 6vw, 3.6rem); line-height:1.15; margin:20px 0 4px; letter-spacing:-.01em; font-weight:800; }
+  .hero .yomi { color:var(--mute); font-size:.9rem; margin:0; }
+  .hero .sub { font-size:clamp(1.15rem, 2.6vw, 1.5rem); font-weight:700; margin:14px 0 10px;
+    background:linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero .lead { max-width:36em; margin:0 auto; color:var(--mute); }
+  .chips { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin:20px 0 0; padding:0; list-style:none; }
+  .chips li { font-size:.82rem; font-weight:600; color:var(--mute); border:1px solid var(--line); background:var(--card); border-radius:999px; padding:3px 12px; }
+  .btns { display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin:28px 0 0; }
+  .btn { display:inline-flex; align-items:center; gap:8px; font-weight:700; text-decoration:none; border-radius:12px; padding:12px 22px; }
+  .btn.primary { background:var(--text); color:var(--bg); }
+  .btn.ghost { border:1px solid var(--line); color:var(--text); background:var(--card); }
+  .btn:hover { opacity:.88; }
+  .shot-hero { margin:48px auto 0; max-width:960px; }
+  .shot-hero img, .gallery img { display:block; width:100%; border-radius:12px; border:1px solid var(--line); box-shadow:var(--shadow); }
+  .note { max-width:44em; margin:28px auto 0; font-size:.88rem; color:var(--mute); text-align:center; }
+  /* 節 */
+  section.block { padding:64px 0; }
+  section.block.alt { background:var(--bg2); }
+  .eyebrow { display:block; text-align:center; font-size:.78rem; font-weight:700; letter-spacing:.12em; color:var(--accent); margin:0 0 6px; }
+  h2 { text-align:center; font-size:clamp(1.5rem, 3.4vw, 2rem); line-height:1.35; margin:0 0 12px; }
+  .intro { text-align:center; color:var(--mute); max-width:38em; margin:0 auto 36px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:22px 22px 18px; }
+  .card .ic { display:inline-grid; place-items:center; width:40px; height:40px; border-radius:11px; font-size:1.2rem;
+              background:color-mix(in srgb, var(--accent) 14%, transparent); }
+  .card h3 { font-size:1.06rem; margin:12px 0 6px; line-height:1.5; }
+  .card p { margin:0; color:var(--mute); font-size:.94rem; }
+  .card .tag { display:inline-block; font-size:.72rem; font-weight:700; color:var(--accent2); margin-left:6px; vertical-align:2px; }
+  .codes { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:28px 0 0; padding:0; list-style:none; }
+  .codes li { font-family:Menlo, ui-monospace, monospace; font-size:.85rem; background:var(--code); color:var(--codetext); border-radius:8px; padding:4px 12px; }
+  /* 画面 */
+  .gallery { display:grid; grid-auto-flow:column; grid-auto-columns:min(82%, 720px); gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; padding:4px 4px 16px; }
+  .gallery figure { margin:0; scroll-snap-align:center; }
+  .gallery.phone { grid-auto-columns:min(56%, 240px); }
+  .gallery figcaption { font-size:.88rem; color:var(--mute); margin-top:10px; text-align:center; }
+  .gallery-label { font-weight:700; margin:32px 0 12px; }
+  /* 使い方 */
+  .how { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px; }
+  .how .card h3 { margin-top:0; font-size:1.15rem; }
+  .how ol { margin:0; padding-left:1.3em; }
+  .how li { margin:0 0 8px; }
+  kbd { font-family:-apple-system, sans-serif; font-size:.82em; border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:0 6px; background:var(--bg2); }
+  .md-list { max-width:760px; margin:0 auto; padding-left:1.3em; }
+  .md-list li { margin:0 0 10px; }
+  .for { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; max-width:860px; margin:0 auto; padding:0; list-style:none; }
+  .for li { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; font-weight:600; }
+  .for li::before { content:"✓"; color:var(--accent); margin-right:8px; }
+  /* よくある質問 */
+  .faq { max-width:780px; margin:0 auto; }
+  .faq details { background:var(--card); border:1px solid var(--line); border-radius:14px; margin:0 0 10px; }
+  .faq summary { cursor:pointer; list-style:none; padding:16px 48px 16px 20px; font-weight:700; position:relative; }
+  .faq summary::-webkit-details-marker { display:none; }
+  .faq summary::after { content:"+"; position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:1.3rem; color:var(--mute); }
+  .faq details[open] summary::after { content:"−"; }
+  .faq .a { padding:0 20px 16px; color:var(--mute); }
+  .faq .a p { margin:0 0 8px; }
+  /* お問い合わせ */
+  .contact { max-width:640px; margin:0 auto; text-align:center; }
+  .contact .card { padding:28px; }
+  .contact p { margin:0 0 10px; }
+  .other-apps { max-width:780px; margin:0 auto !important; padding:56px 24px 0; }
+  .other-apps h2 { margin-bottom:4px; }
+  .other-apps > p { text-align:center; }
+  .other-apps ul { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:4px 20px; }
+  .other-apps li { line-height:1.5; }
+  footer { text-align:center; color:var(--mute); font-size:.85rem; padding:40px 24px 56px; margin-top:56px; border-top:1px solid var(--line); }
+  @media (max-width:640px) { .top nav { display:none; } .hero { padding-top:48px; } section.block { padding:48px 0; } }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } }
+  .en { padding-top:24px; }
+  .en-sep { border:0; border-top:1px solid var(--line); margin:64px 0 0; }
+  .en .how { grid-template-columns:1fr; max-width:780px; margin:0 auto; }
+  .keys { display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); gap:16px; align-items:start; }
+  .keys h3 { margin:0 0 10px; font-size:1.05rem; }
+  .keys table { width:100%; border-collapse:collapse; font-size:.92rem; }
+  .keys th { text-align:left; white-space:nowrap; padding:6px 14px 6px 0; vertical-align:top; font-weight:400; }
+  .keys td { padding:6px 0; color:var(--mute); border-bottom:1px solid var(--line); }
+  .keys tr:last-child td { border-bottom:0; }
+  .keys-note { text-align:center; color:var(--mute); font-size:.9rem; margin:20px auto 0; max-width:44em; }
+  @media (max-width:640px) { .keys { grid-template-columns:1fr; } }
+  .notecard { display:block; text-align:left; text-decoration:none; color:var(--text); transition:transform .15s ease; }
+  .notecard:hover { transform:translateY(-2px); }
+  .nc-site { display:inline-block; font-size:.75rem; font-weight:700; color:var(--bg); background:var(--text); border-radius:6px; padding:1px 8px; }
+  .nc-title { display:block; font-weight:700; font-size:1.1rem; line-height:1.5; margin:10px 0 6px; }
+  .nc-lead { display:block; color:var(--mute); font-size:.92rem; }
+  .nc-go { display:block; color:var(--accent); font-weight:700; margin-top:10px; }
+  .outs { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px; }
+  .outs div { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .outs b { display:block; margin-bottom:4px; }
+  .outs span { color:var(--mute); font-size:.9rem; }
 </style>
 <!-- リンクを貼ったときに出る紹介カード（OGP） -->
 <meta property="og:type" content="website">
@@ -34,50 +143,111 @@
 <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-<h1>グッズ注文まとめ</h1>
-<p class="og-card"><img src="og.png" alt="グッズ注文まとめの紹介" width="1200" height="630" style="display:block;width:100%;max-width:720px;height:auto;border-radius:12px;margin:12px 0 24px;"></p>
-<p>グッズ注文まとめは、部活やサークルのオリジナルグッズ販売で、Googleフォームに集まった申込を取り込んで、個人別の明細・配布用の明細（1人1ページ）・商品別の一覧・業者に渡す発注用の数量表・集金表を PDF と Excel で作る macOS / iPadOS / iOS アプリです。データはすべてお使いの端末の中だけで処理され、外部に送られることはありません。</p>
+<header class="top"><div class="wrap">
+  <a class="brand" href="#"><img src="img/icon.png" alt="" width="28" height="28">グッズ注文まとめ</a>
+  <nav aria-label="ページ内の移動"><a href="#features">特長</a><a href="#outputs">作れる表</a><a href="#screens">画面</a><a href="#howto">使い方</a><a href="#faq">よくある質問</a><a href="#contact">お問い合わせ</a></nav>
+</div></header>
 
-<h2>使い方（基本の流れ）</h2>
-<ol>
+<main>
+<section class="hero"><div class="wrap">
+  <img class="icon" src="img/icon.png" alt="グッズ注文まとめのアイコン" width="112" height="112">
+  <h1>グッズ注文まとめ</h1>
+  <p class="sub">フォームの申込から、配布・発注・集金の表まで。</p>
+  <p class="lead">部活やサークルのオリジナルグッズ販売で、担当者が Excel で手作業していた集計をまとめて引き受けるアプリです。Google フォームに集まった申込を取り込むだけで、配布用の明細や業者に渡す数量表、集金表を PDF と Excel で作ります。</p>
+  <ul class="chips"><li>Mac</li><li>iPhone</li><li>iPad</li><li>一度の購入で全部の端末に</li><li>通信なし・データの収集なし</li></ul>
+  <div class="btns">
+    <a class="btn primary" href="https://apps.apple.com/jp/app/id6809134949">App Store で見る</a>
+    <a class="btn ghost" href="#howto">使い方を見る</a>
+  </div>
+  <figure class="shot-hero" style="margin-left:auto;margin-right:auto;"><img src="img/mac-02.jpg" alt="配布用の明細の画面（架空のサンプルデータ）" width="1600" height="1000"></figure>
+</div></section>
+
+<section class="block alt" id="features"><div class="wrap">
+  <span class="eyebrow">FEATURES</span>
+  <h2>手作業の集計を、まとめて引き受ける</h2>
+  <p class="intro">申込を取り込んだら、あとは確かめて書き出すだけ。名前の表記ゆれや二重申込のような、手作業で見落としやすいところも拾います。</p>
+  <div class="grid">
+    <div class="card"><span class="ic" aria-hidden="true">📥</span><h3>開くだけで取り込み</h3><p>回答シートを Excel 形式（.xlsx）で保存して開くだけ。CSV や、シートをコピーしての貼り付けにも対応。</p></div>
+    <div class="card"><span class="ic" aria-hidden="true">🔎</span><h3>列を見出しで見分ける</h3><p>列の並びや数が年ごとに変わっても、見出しの言葉から自動で判定。読めないときは列の役割を手で指定できます。</p></div>
+    <div class="card"><span class="ic" aria-hidden="true">💴</span><h3>単価を自動で読む</h3><p>「①半袖Tシャツ ￥1,700」のような選択肢から、並び順と単価を読み取ります。価格が無ければ数量だけを集計。</p></div>
+    <div class="card"><span class="ic" aria-hidden="true">👥</span><h3>表記ゆれと二重申込</h3><p>スペースの有無だけの違いは自動でまとめ、姓が同じで名が違う人は候補として提示。同じ人の二重申込は行番号でお知らせ。</p></div>
+    <div class="card"><span class="ic" aria-hidden="true">🏠</span><h3>兄弟をまとめて集金</h3><p>兄弟を「同じ世帯」にすると、集計表と配布用の明細が1つにまとまります。</p></div>
+    <div class="card"><span class="ic" aria-hidden="true">↕️</span><h3>区分の並び順を自由に</h3><p>パートやポジションなどの並び順をドラッグで決められ、次回も覚えています。</p></div>
+  </div>
+</div></section>
+
+<section class="block" id="outputs"><div class="wrap">
+  <span class="eyebrow">OUTPUTS</span>
+  <h2>作れる表</h2>
+  <p class="intro">PDF と Excel で書き出せます。Mac は印刷ボタンから直接印刷、iPhone・iPad は共有シートからファイルに保存・AirDrop・メールで渡せます。</p>
+  <div class="outs">
+    <div><b>個人別一覧</b><span>区分→氏名ごとの明細と個人の合計</span></div>
+    <div><b>配布用（1人1ページ）</b><span>宛名・合計・集金日と受領印の欄つき。印刷してそのまま各家庭へ</span></div>
+    <div><b>商品別一覧</b><span>グッズ→カラー→サイズごとの数量と注文した人</span></div>
+    <div><b>発注用</b><span>グッズごとのカラー×サイズの枚数表。金額は載せないので業者にそのまま渡せます</span></div>
+    <div><b>集計表</b><span>氏名ごとの合計金額と集金日の欄</span></div>
+    <div><b>Excel ブック</b><span>上の表をシート4枚にまとめて書き出し</span></div>
+  </div>
+</div></section>
+
+<section class="block alt" id="screens"><div class="wrap">
+  <span class="eyebrow">SCREENS</span>
+  <h2>画面</h2>
+  <p class="intro">写っている名前と注文は、アプリの「サンプルデータで試す」の架空のデータです。</p>
+  <p class="gallery-label">Mac</p>
+  <div class="gallery"><figure><img src="img/mac-01.jpg" alt="" width="1600" height="1000" loading="lazy"><figcaption>個人別一覧</figcaption></figure><figure><img src="img/mac-02.jpg" alt="" width="1600" height="1000" loading="lazy"><figcaption>配布用（1人1ページ）</figcaption></figure><figure><img src="img/mac-03.jpg" alt="" width="1600" height="1000" loading="lazy"><figcaption>発注用（カラー×サイズ）</figcaption></figure><figure><img src="img/mac-04.jpg" alt="" width="1600" height="1000" loading="lazy"><figcaption>調整（表記ゆれ・兄弟の合算・単価）</figcaption></figure></div>
+  <p class="gallery-label">iPhone</p>
+  <div class="gallery phone">
+    <figure><img src="img/iphone-01.jpg" alt="" width="552" height="1200" loading="lazy"><figcaption>取り込みと確認</figcaption></figure>
+    <figure><img src="img/iphone-02.jpg" alt="" width="552" height="1200" loading="lazy"><figcaption>個人別一覧</figcaption></figure>
+    <figure><img src="img/iphone-03.jpg" alt="" width="552" height="1200" loading="lazy"><figcaption>発注用</figcaption></figure>
+    <figure><img src="img/iphone-04.jpg" alt="" width="552" height="1200" loading="lazy"><figcaption>配布用</figcaption></figure>
+  </div>
+</div></section>
+
+<section class="block" id="howto"><div class="wrap">
+  <span class="eyebrow">HOW TO</span>
+  <h2>使い方</h2>
+  <div class="how">
+    <div class="card"><h3>基本の流れ</h3><ol>
   <li>Googleフォームの回答スプレッドシートを開き、メニューの「ファイル」→「ダウンロード」→「Microsoft Excel（.xlsx）」で保存します。</li>
   <li>アプリの「ファイルを開く」でその .xlsx を選びます（CSV でも読めます。Mac では、シートを見出し行ごと全選択してコピーし、「販売データを貼り付け」でも取り込めます）。</li>
   <li>「取込 104件 / 34人 / …」のように件数と合計が表示されたら取り込み完了です。</li>
   <li>「調整」で氏名の表記ゆれ・兄弟の合算・単価を直し、「警告」で二重回答などを確かめます。</li>
   <li>「個人別一覧PDF」「配布用PDF」「商品別一覧PDF」「発注用PDF」「集計表PDF」「Excel」のボタンで書き出します。iPad / iPhone では共有シートから「ファイルに保存」や AirDrop で渡せます。</li>
-</ol>
-<p>初めて使うときは「サンプルデータで試す」を押すと、架空の申込データで一通りの動きを確かめられます。</p>
-
-<h2>フォームの作り方（このアプリで読めるシートにするために）</h2>
-<ul>
+</ol><p style="color:var(--mute);font-size:.9rem;margin:10px 0 0;">初めて使うときは「サンプルデータで試す」を押すと、架空の申込データで一通りの動きを確かめられます。</p></div>
+    <div class="card"><h3>フォームの作り方</h3><p style="color:var(--mute);font-size:.9rem;margin:0 0 8px;">このアプリで読めるシートにするために。</p><ul>
   <li>質問の見出しに「区分（パート・ポジション・学年など）」「氏名」「グッズ（商品）」「カラー」「サイズ」「数量」という言葉を含めてください。列の並び順や数は自由です。</li>
   <li>グッズの選択肢に「①半袖Tシャツ ￥1,700」のように丸数字と価格を入れておくと、並び順と単価を自動で読み取ります。価格が無い場合は数量だけを集計します（単価はアプリ内でも入力できます）。</li>
   <li>見出しの言葉が違って読めなかったときは、「列マッピング」でどの列が何かを指定できます。</li>
-</ul>
+</ul></div>
+  </div>
+</div></section>
 
-<h2>よくある質問</h2>
-<dl>
-  <dt>Q. Googleスプレッドシートに直接つなげますか？</dt>
-  <dd>A. つなぎません。このアプリは外部と通信しない設計です。スプレッドシートの「ファイル」→「ダウンロード」で .xlsx を保存して開いてください。</dd>
-  <dt>Q. 「区分・グッズの列を見つけられませんでした」と出ます</dt>
-  <dd>A. 見出しの言葉がアプリの知っている言葉と違っています。「列マッピング」で役割を指定して「再解析」を押すか、「設定」→「列の判定」にその見出しに含まれる言葉を足してください。</dd>
-  <dt>Q. 同じ人が2人として集計されます</dt>
-  <dd>A. 「調整」の「表記ゆれの候補」に出ていれば、残す表記を選んで「まとめる」を押してください。次回からは自動で同じ人として扱います。スペースの有無だけの違いは、最初から自動でまとめています。</dd>
-  <dt>Q. 兄弟をまとめて集金したい</dt>
-  <dd>A. 「調整」の「兄弟の合算（同じ世帯）」で2人以上を「同じ世帯にする」と、集計表と配布用PDFで1つにまとまります。</dd>
-  <dt>Q. 発注用PDFに金額が出ないのはなぜですか？</dt>
-  <dd>A. 業者に渡す表なので、意図的に金額を載せていません。金額は個人別一覧・商品別一覧・集計表・Excel に出ます。</dd>
-  <dt>Q. iPad / iPhone で Google ドライブのファイルが選べません</dt>
-  <dd>A. 「ファイル」アプリの左の一覧（ブラウズ）で「…」→「サイドバーを編集」を開き、Google Drive をオンにしてください。以後、アプリの「ファイルを開く」からも Google ドライブの中が見えます。</dd>
-  <dt>Q. 印刷できますか？</dt>
-  <dd>A. Mac は「印刷…」（⌘P）で、いま見ている表をそのまま印刷できます。iPad / iPhone は PDF を書き出してから、ファイルアプリなどで印刷してください。</dd>
-</dl>
+<section class="block alt" id="faq"><div class="wrap">
+  <span class="eyebrow">FAQ</span>
+  <h2>よくある質問</h2>
+  <div class="faq">
+    <details><summary>Googleスプレッドシートに直接つなげますか？</summary><div class="a"><p>つなぎません。このアプリは外部と通信しない設計です。スプレッドシートの「ファイル」→「ダウンロード」で .xlsx を保存して開いてください。</p></div></details>
+    <details><summary>「区分・グッズの列を見つけられませんでした」と出ます</summary><div class="a"><p>見出しの言葉がアプリの知っている言葉と違っています。「列マッピング」で役割を指定して「再解析」を押すか、「設定」→「列の判定」にその見出しに含まれる言葉を足してください。</p></div></details>
+    <details><summary>同じ人が2人として集計されます</summary><div class="a"><p>「調整」の「表記ゆれの候補」に出ていれば、残す表記を選んで「まとめる」を押してください。次回からは自動で同じ人として扱います。スペースの有無だけの違いは、最初から自動でまとめています。</p></div></details>
+    <details><summary>兄弟をまとめて集金したい</summary><div class="a"><p>「調整」の「兄弟の合算（同じ世帯）」で2人以上を「同じ世帯にする」と、集計表と配布用PDFで1つにまとまります。</p></div></details>
+    <details><summary>発注用PDFに金額が出ないのはなぜですか？</summary><div class="a"><p>業者に渡す表なので、意図的に金額を載せていません。金額は個人別一覧・商品別一覧・集計表・Excel に出ます。</p></div></details>
+    <details><summary>iPad / iPhone で Google ドライブのファイルが選べません</summary><div class="a"><p>「ファイル」アプリの左の一覧（ブラウズ）で「…」→「サイドバーを編集」を開き、Google Drive をオンにしてください。以後、アプリの「ファイルを開く」からも Google ドライブの中が見えます。</p></div></details>
+    <details><summary>印刷できますか？</summary><div class="a"><p>Mac は「印刷…」（⌘P）で、いま見ている表をそのまま印刷できます。iPad / iPhone は PDF を書き出してから、ファイルアプリなどで印刷してください。</p></div></details>
+  </div>
+</div></section>
 
-<h2>お問い合わせ</h2>
-<p>不具合のご報告・ご要望は、以下のメールアドレスまでお気軽にご連絡ください。</p>
-<p><a href="mailto:emc.hs07@gmail.com">emc.hs07@gmail.com</a></p>
-
-<p><a href="privacy.html">プライバシーポリシー</a></p>
+<section class="block" id="contact"><div class="wrap contact">
+  <span class="eyebrow">CONTACT</span>
+  <h2>お問い合わせ</h2>
+  <div class="card">
+    <p>不具合のご報告やご要望は、メールでお気軽にどうぞ。</p>
+    <p><a class="btn ghost" href="mailto:emc.hs07@gmail.com">emc.hs07@gmail.com</a></p>
+    <p style="font-size:.9rem;color:var(--mute);margin:14px 0 0;">データはすべてお使いの端末の中だけで処理し、外部には送りません。くわしくは <a href="privacy.html">プライバシーポリシー</a> をご覧ください。</p>
+  </div>
+</div></section>
+</main>
 
 <!-- この作者のほかのアプリ（ここから） -->
 <section class="other-apps" style="margin-top:3rem;">
